@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Animated gradient orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    
+    <div class="container">
+        <div class="card">
+            <h1 class="app-title">{{ app_title }}</h1>
+            
+            <!-- Upload zone -->
+            <div class="upload-zone">
+                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                <button class="btn-upload" id="uploadBtn">Загрузить фото</button>
+            </div>
+            
+            <!-- Preview area -->
+            <div id="previewArea" class="preview-area" style="display: none;">
+                <div id="singlePreview" class="single-preview">
+                    <div class="preview-wrapper">
+                        <img id="originalImage" src="" alt="Оригинал">
+                    </div>
+                    <button class="btn-process" id="processBtn">Обработать</button>
+                </div>
+                
+                <div id="resultsPreview" class="results-preview" style="display: none;">
+                    <div class="results-grid">
+                        <div class="preview-wrapper">
+                            <img id="beforeImage" src="" alt="До обработки">
+                        </div>
+                        <div class="preview-wrapper">
+                            <img id="afterImage" src="" alt="После обработки">
+                        </div>
+                    </div>
+                    <div class="success-message">Успешно обработано!</div>
+                </div>
+            </div>
+            
+            <!-- Loading spinner -->
+            <div id="loadingSpinner" class="spinner" style="display: none;">
+                <div class="spinner-circle"></div>
+                <p>Обработка...</p>
+            </div>
+            
+            <!-- Error message -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const processBtn = document.getElementById('processBtn');
+        const previewArea = document.getElementById('previewArea');
+        const singlePreview = document.getElementById('singlePreview');
+        const resultsPreview = document.getElementById('resultsPreview');
+        const originalImage = document.getElementById('originalImage');
+        const beforeImage = document.getElementById('beforeImage');
+        const afterImage = document.getElementById('afterImage');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        let currentFile = null;
+        
+        // Открытие диалога выбора файла
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Обработка выбора файла
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Проверка типа файла
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showError('Недопустимый формат файла. Используйте JPG, PNG или WEBP.');
+                return;
+            }
+            
+            // Сохраняем файл и показываем превью
+            currentFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+                previewArea.style.display = 'block';
+                singlePreview.style.display = 'flex';
+                resultsPreview.style.display = 'none';
+                hideError();
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Обработка изображения
+        processBtn.addEventListener('click', async () => {
+            if (!currentFile) return;
+            
+            // Показываем спиннер
+            loadingSpinner.style.display = 'flex';
+            singlePreview.style.display = 'none';
+            hideError();
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', currentFile);
+                
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Ошибка обработки');
+                }
+                
+                // Показываем результаты
+                beforeImage.src = data.original;
+                afterImage.src = data.processed;
+                loadingSpinner.style.display = 'none';
+                resultsPreview.style.display = 'block';
+                
+            } catch (error) {
+                loadingSpinner.style.display = 'none';
+                singlePreview.style.display = 'flex';
+                showError(error.message || 'Произошла ошибка при обработке изображения');
+            }
+        });
+        
+        // Функции для отображения ошибок
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

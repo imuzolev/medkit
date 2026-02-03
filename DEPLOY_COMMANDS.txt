@@ -1,0 +1,45 @@
+=== КОМАНДЫ ДЛЯ ДЕПЛОЯ ПРОЕКТА НА СЕРВЕР ===
+
+Сервер: root@2.56.240.119
+Путь на сервере: ~/analiz_aptechki
+
+Выполняйте команды по порядку в PowerShell:
+
+1. Переход в директорию проекта:
+cd D:\ivantuz\profi
+
+2. Создание директории на сервере:
+ssh root@2.56.240.119 "mkdir -p ~/analiz_aptechki"
+
+3. Создание файла analiz_aptechki в корне:
+ssh root@2.56.240.119 "cd ~ && touch analiz_aptechki && echo 'Проект анализа аптечки' > analiz_aptechki"
+
+4. Загрузка app.py:
+scp app.py root@2.56.240.119:~/analiz_aptechki/
+
+5. Загрузка requirements.txt:
+scp requirements.txt root@2.56.240.119:~/analiz_aptechki/
+
+6. Загрузка папки templates:
+scp -r templates root@2.56.240.119:~/analiz_aptechki/
+
+7. Загрузка папки static:
+scp -r static root@2.56.240.119:~/analiz_aptechki/
+
+8. Создание виртуального окружения на сервере:
+ssh root@2.56.240.119 "cd ~/analiz_aptechki && python3 -m venv venv"
+
+9. Обновление pip:
+ssh root@2.56.240.119 "cd ~/analiz_aptechki && source venv/bin/activate && pip install --upgrade pip"
+
+10. Установка зависимостей:
+ssh root@2.56.240.119 "cd ~/analiz_aptechki && source venv/bin/activate && pip install -r requirements.txt"
+
+11. Запуск приложения (на сервере):
+ssh root@2.56.240.119 "cd ~/analiz_aptechki && source venv/bin/activate && python app.py"
+
+Или подключитесь к серверу и запустите вручную:
+ssh root@2.56.240.119
+cd ~/analiz_aptechki
+source venv/bin/activate
+python app.py
