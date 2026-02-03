@@ -1,0 +1,22 @@
+name: Deploy to Coolify
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  notify-coolify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify Deployment
+        run: |
+          if [ -n "${{ secrets.COOLIFY_WEBHOOK_URL }}" ]; then
+            echo "Triggering Coolify deployment via webhook..."
+            curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d '{"ref":"refs/heads/main","repository":{"full_name":"imuzolev/medkit"}}'
+          else
+            echo "COOLIFY_WEBHOOK_URL secret not set. Skipping webhook trigger."
+            echo "Please configure webhook in Coolify UI or set the secret."
+          fi

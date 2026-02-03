@@ -69,6 +69,58 @@ medkit/
 4. Нажмите "Обработать"
 5. Просмотрите результаты обработки
 
+## Деплой
+
+### Деплой через Coolify (рекомендуется)
+
+Проект настроен для автоматического деплоя через [Coolify](https://coolify.io/).
+
+#### Быстрая установка Coolify на сервер:
+
+```powershell
+# На локальном компьютере (Windows)
+.\install_coolify.ps1
+```
+
+Или вручную на сервере:
+
+```bash
+# На сервере
+curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
+```
+
+#### Настройка автоматического деплоя:
+
+1. Откройте Coolify UI: `http://2.56.240.119:8000`
+2. Создайте новый проект
+3. Подключите GitHub репозиторий: `imuzolev/medkit`
+4. Настройте автоматический деплой из ветки `main`
+
+Подробная инструкция: см. [COOLIFY_SETUP.md](COOLIFY_SETUP.md)
+
+### Локальный запуск с Docker
+
+```bash
+# Сборка образа
+docker build -t medkit .
+
+# Запуск контейнера
+docker run -p 5000:5000 medkit
+```
+
+## Структура проекта
+
+```
+medkit/
+├── app.py              # Основной файл приложения
+├── requirements.txt    # Зависимости проекта
+├── Dockerfile         # Конфигурация Docker
+├── templates/         # HTML шаблоны
+│   └── index.html
+└── static/           # Статические файлы (CSS, JS)
+    └── style.css
+```
+
 ## Лицензия
 
 MIT
