@@ -138,5 +138,10 @@ if __name__ == '__main__':
     # Получаем порт из переменной окружения (для Coolify) или используем 5000 по умолчанию
     port = int(os.environ.get('PORT', 5000))
     
+    # Выводим информацию о запуске для логов Coolify
+    print(f"Starting Flask application on port {port}")
+    print(f"PORT environment variable: {os.environ.get('PORT', 'not set (using default 5000)')}")
+    sys.stdout.flush()
+    
     # Запускаем без лишнего вывода
     app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
