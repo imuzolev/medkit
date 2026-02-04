@@ -1,6 +1,7 @@
 import io
 import base64
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -20,7 +21,7 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.logger.disabled = True
 
-APP_TITLE = "Анализ содержимого аптечки"
+APP_TITLE = "АПТЕЧКА"
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
 
 
@@ -134,5 +135,8 @@ if __name__ == '__main__':
     Path('templates').mkdir(exist_ok=True)
     Path('static').mkdir(exist_ok=True)
     
+    # Получаем порт из переменной окружения (для Coolify) или используем 5000 по умолчанию
+    port = int(os.environ.get('PORT', 5000))
+    
     # Запускаем без лишнего вывода
-    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)
+    app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
