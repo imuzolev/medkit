@@ -141,7 +141,17 @@ if __name__ == '__main__':
     # Выводим информацию о запуске для логов Coolify
     print(f"Starting Flask application on port {port}")
     print(f"PORT environment variable: {os.environ.get('PORT', 'not set (using default 5000)')}")
+    print(f"Host: 0.0.0.0")
     sys.stdout.flush()
     
-    # Запускаем без лишнего вывода
-    app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
+    try:
+        # Запускаем без лишнего вывода
+        print(f"Calling app.run()...")
+        sys.stdout.flush()
+        app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
+        print(f"Flask server started successfully on 0.0.0.0:{port}")
+        sys.stdout.flush()
+    except Exception as e:
+        print(f"ERROR starting Flask: {e}")
+        sys.stdout.flush()
+        raise
