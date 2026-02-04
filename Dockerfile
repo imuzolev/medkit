@@ -30,5 +30,7 @@ RUN mkdir -p templates static
 # Экспонируем оба порта для совместимости
 EXPOSE 3000 5000
 
-# Запускаем приложение
-CMD ["python", "app.py"]
+# Запускаем приложение через gunicorn для production
+# Используем переменную PORT из окружения (Coolify устанавливает её автоматически)
+# Если PORT не установлен, используем 5000 по умолчанию
+CMD sh -c 'gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --threads 2 --timeout 120 --access-logfile - --error-logfile - app:app'
