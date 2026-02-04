@@ -135,4 +135,4 @@ if __name__ == '__main__':
     Path('static').mkdir(exist_ok=True)
     
     # Запускаем без лишнего вывода
-    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)
+    app.run(debug=False, host='0.0.0.0', port=3000, use_reloader=False)
