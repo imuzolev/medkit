@@ -22,7 +22,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.logger.disabled = True
 
 APP_TITLE = "АПТЕЧКА"
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}  # Поддерживаемые форматы изображений
 
 
 def allowed_file(filename):
