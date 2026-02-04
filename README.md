@@ -96,7 +96,14 @@ curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 3. Подключите GitHub репозиторий: `imuzolev/medkit`
 4. Настройте автоматический деплой из ветки `main`
 
-Подробная инструкция: см. [COOLIFY_SETUP.md](COOLIFY_SETUP.md)
+#### Быстрый деплой на сервер:
+
+```powershell
+# Запустите скрипт деплоя (отправит изменения на GitHub, Coolify автоматически задеплоит)
+.\deploy_to_server.ps1
+```
+
+После выполнения скрипта все изменения будут отправлены на GitHub, и Coolify автоматически задеплоит приложение на сервер.
 
 ### Локальный запуск с Docker
 
