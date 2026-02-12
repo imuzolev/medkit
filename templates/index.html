@@ -17,8 +17,19 @@
             
             <!-- Upload zone -->
             <div class="upload-zone">
-                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                <input type="file" id="galleryInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
                 <button class="btn-upload" id="uploadBtn">Загрузить фото</button>
+                <div class="upload-dropdown" id="uploadDropdown">
+                    <button class="dropdown-item" id="cameraBtn">
+                        <span class="dropdown-icon camera">📷</span>
+                        Сделать фото
+                    </button>
+                    <button class="dropdown-item" id="galleryBtn">
+                        <span class="dropdown-icon gallery">🖼</span>
+                        Выбрать из галереи
+                    </button>
+                </div>
             </div>
             
             <!-- Preview area -->
@@ -31,15 +42,11 @@
                 </div>
                 
                 <div id="resultsPreview" class="results-preview" style="display: none;">
-                    <div class="results-grid">
-                        <div class="preview-wrapper">
-                            <img id="beforeImage" src="" alt="До обработки">
-                        </div>
-                        <div class="preview-wrapper">
-                            <img id="afterImage" src="" alt="После обработки">
-                        </div>
+                    <div class="preview-wrapper">
+                        <img id="resultImage" src="" alt="Загруженное фото">
                     </div>
-                    <div class="success-message">Успешно обработано!</div>
+                    <div id="resultStatus" class="success-message"></div>
+                    <div id="resultDetails"></div>
                 </div>
             </div>
             
@@ -55,27 +62,56 @@
     </div>
     
     <script>
-        const fileInput = document.getElementById('fileInput');
+        const cameraInput = document.getElementById('cameraInput');
+        const galleryInput = document.getElementById('galleryInput');
         const uploadBtn = document.getElementById('uploadBtn');
+        const uploadDropdown = document.getElementById('uploadDropdown');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const galleryBtn = document.getElementById('galleryBtn');
         const processBtn = document.getElementById('processBtn');
         const previewArea = document.getElementById('previewArea');
         const singlePreview = document.getElementById('singlePreview');
         const resultsPreview = document.getElementById('resultsPreview');
         const originalImage = document.getElementById('originalImage');
-        const beforeImage = document.getElementById('beforeImage');
-        const afterImage = document.getElementById('afterImage');
+        const resultImage = document.getElementById('resultImage');
+        const resultStatus = document.getElementById('resultStatus');
+        const resultDetails = document.getElementById('resultDetails');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const errorMessage = document.getElementById('errorMessage');
         
         let currentFile = null;
         
-        // Открытие диалога выбора файла
-        uploadBtn.addEventListener('click', () => {
-            fileInput.click();
+        // Открытие/закрытие выпадающего меню
+        uploadBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            uploadDropdown.classList.toggle('open');
         });
         
-        // Обработка выбора файла
-        fileInput.addEventListener('change', (e) => {
+        // Закрытие меню при клике вне
+        document.addEventListener('click', () => {
+            uploadDropdown.classList.remove('open');
+        });
+        
+        uploadDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Кнопка «Сделать фото»
+        cameraBtn.addEventListener('click', () => {
+            uploadDropdown.classList.remove('open');
+            cameraInput.value = '';
+            cameraInput.click();
+        });
+        
+        // Кнопка «Выбрать из галереи»
+        galleryBtn.addEventListener('click', () => {
+            uploadDropdown.classList.remove('open');
+            galleryInput.value = '';
+            galleryInput.click();
+        });
+        
+        // Общий обработчик выбора файла
+        function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
             
@@ -89,15 +125,18 @@
             // Сохраняем файл и показываем превью
             currentFile = file;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                originalImage.src = e.target.result;
+            reader.onload = (ev) => {
+                originalImage.src = ev.target.result;
                 previewArea.style.display = 'block';
                 singlePreview.style.display = 'flex';
                 resultsPreview.style.display = 'none';
                 hideError();
             };
             reader.readAsDataURL(file);
-        });
+        }
+        
+        cameraInput.addEventListener('change', handleFileSelect);
+        galleryInput.addEventListener('change', handleFileSelect);
         
         // Обработка изображения
         processBtn.addEventListener('click', async () => {
@@ -123,9 +162,21 @@
                     throw new Error(data.error || 'Ошибка обработки');
                 }
                 
-                // Показываем результаты
-                beforeImage.src = data.original;
-                afterImage.src = data.processed;
+                // Показываем результаты проверки комплектации
+                resultImage.src = originalImage.src;
+                resultStatus.textContent = data.is_complete ? 'Комплектация полная' : 'Комплектация неполная';
+                resultStatus.classList.toggle('status-incomplete', !data.is_complete);
+                
+                // Формируем красивый список
+                if (data.is_complete) {
+                    resultDetails.innerHTML = '<div class="result-complete">Все предметы на месте</div>';
+                } else if (data.missing && data.missing.length > 0) {
+                    const items = data.missing.map(m => `<li>${m}</li>`).join('');
+                    resultDetails.innerHTML = `<ul class="missing-list">${items}</ul>`;
+                } else {
+                    resultDetails.innerHTML = '';
+                }
+                
                 loadingSpinner.style.display = 'none';
                 resultsPreview.style.display = 'block';
                 
