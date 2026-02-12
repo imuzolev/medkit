@@ -76,28 +76,31 @@ jobs:
 
     steps:
       - name: Trigger Coolify Deployment
+        env:
+          WEBHOOK_URL: ${{ secrets.COOLIFY_WEBHOOK_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
-          if [ -n "${{ secrets.COOLIFY_WEBHOOK_URL }}" ]; then
-            echo "Triggering Coolify deployment via webhook..."
-            
-            # Собираем заголовки: Content-Type + опциональный Bearer-токен
-            AUTH_HEADER=""
-            if [ -n "${{ secrets.COOLIFY_TOKEN }}" ]; then
-              AUTH_HEADER="-H \"Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}\""
-            fi
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "⚠ COOLIFY_WEBHOOK_URL secret not set. Skipping."
+            exit 0
+          fi
 
-            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
-              -H "Content-Type: application/json" \
-              ${AUTH_HEADER} \
-              -d '{"ref":"refs/heads/main","repository":{"full_name":"imuzolev/medkit"}}')
+          echo "Triggering Coolify deployment via webhook..."
 
-            if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
-              echo "✓ Coolify deployment triggered successfully (HTTP $response)"
-            else
-              echo "✗ Coolify webhook returned HTTP $response"
-              exit 1
-            fi
+          CURL_ARGS=(-s -o /dev/null -w "%{http_code}" -X POST "$WEBHOOK_URL")
+          CURL_ARGS+=(-H "Content-Type: application/json")
+
+          if [ -n "$COOLIFY_TOKEN" ]; then
+            CURL_ARGS+=(-H "Authorization: Bearer $COOLIFY_TOKEN")
+          fi
+
+          CURL_ARGS+=(-d '{"ref":"refs/heads/main","repository":{"full_name":"imuzolev/medkit"}}')
+
+          response=$(curl "${CURL_ARGS[@]}")
+
+          if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
+            echo "✓ Coolify deployment triggered (HTTP $response)"
           else
-            echo "⚠ COOLIFY_WEBHOOK_URL secret not set. Skipping webhook trigger."
-            echo "Please configure webhook in Coolify UI or set the secret."
+            echo "✗ Coolify webhook returned HTTP $response"
+            exit 1
           fi
