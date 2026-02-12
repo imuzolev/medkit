@@ -17,6 +17,9 @@ WORKDIR /app
 # Копируем файл зависимостей
 COPY requirements.txt .
 
+# Устанавливаем PyTorch CPU-only (без CUDA — экономим ~1.5 ГБ)
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
 # Устанавливаем Python зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
