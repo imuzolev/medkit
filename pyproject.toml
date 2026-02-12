@@ -1,0 +1,30 @@
+[tool.ruff]
+# Целевая версия Python
+target-version = "py311"
+# Максимальная длина строки
+line-length = 120
+# Проверяемые файлы
+include = ["*.py"]
+
+[tool.ruff.lint]
+# Набор правил:
+# E/W  — pycodestyle (ошибки стиля)
+# F    — Pyflakes (логические ошибки: неиспользуемые импорты, undefined names и т.д.)
+# I    — isort (порядок импортов)
+# UP   — pyupgrade (устаревший синтаксис)
+# B    — flake8-bugbear (частые баги)
+# SIM  — flake8-simplify (упрощения кода)
+select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+
+# Игнорируемые правила (разумные исключения для данного проекта)
+ignore = [
+    "E501",    # длина строки — контролируется line-length, но не блокирует
+    "SIM108",  # тернарный оператор вместо if-else (не всегда читабельнее)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# В app.py допускаем global statement (нужен для ленивой загрузки модели)
+"app.py" = ["PLW0603"]
+
+[tool.ruff.lint.isort]
+known-third-party = ["flask", "cv2", "numpy", "ultralytics"]

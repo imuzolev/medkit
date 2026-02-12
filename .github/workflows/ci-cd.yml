@@ -1,0 +1,94 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Шаг 1: Проверка кода (линтер + синтаксис)
+  # ──────────────────────────────────────────────
+  lint:
+    name: Lint & Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linting tools
+        run: pip install ruff
+
+      - name: Check Python syntax
+        run: python -m py_compile app.py
+
+      - name: Lint with Ruff (critical errors — block deploy)
+        run: |
+          ruff check app.py --select=E9,F63,F7,F82 --output-format=full
+          echo "✓ No critical errors found"
+
+      - name: Lint with Ruff (full analysis)
+        run: |
+          ruff check app.py --output-format=full
+          echo "✓ All lint checks passed"
+
+  # ──────────────────────────────────────────────
+  # Шаг 2: Проверка сборки Docker-образа
+  # ──────────────────────────────────────────────
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: medkit:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ──────────────────────────────────────────────
+  # Шаг 3: Деплой в Coolify (только main, после CI)
+  # ──────────────────────────────────────────────
+  deploy:
+    name: Deploy to Coolify
+    runs-on: ubuntu-latest
+    needs: [ lint, docker-build ]
+    # Деплой только при пуше в main (не на PR)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Trigger Coolify Deployment
+        run: |
+          if [ -n "${{ secrets.COOLIFY_WEBHOOK_URL }}" ]; then
+            echo "Triggering Coolify deployment via webhook..."
+            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d '{"ref":"refs/heads/main","repository":{"full_name":"imuzolev/medkit"}}')
+            if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
+              echo "✓ Coolify deployment triggered successfully (HTTP $response)"
+            else
+              echo "✗ Coolify webhook returned HTTP $response"
+              exit 1
+            fi
+          else
+            echo "⚠ COOLIFY_WEBHOOK_URL secret not set. Skipping webhook trigger."
+            echo "Please configure webhook in Coolify UI or set the secret."
+          fi

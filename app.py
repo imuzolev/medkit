@@ -6,7 +6,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, render_template, request
 from ultralytics import YOLO
 
 # Отключаем логирование Flask и Werkzeug
@@ -271,15 +271,15 @@ def process():
     try:
         if 'image' not in request.files:
             return jsonify({'error': 'Файл не найден'}), 400
-        
+
         file = request.files['image']
-        
+
         if file.filename == '':
             return jsonify({'error': 'Файл не выбран'}), 400
-        
+
         if not allowed_file(file.filename):
             return jsonify({'error': 'Недопустимый формат файла'}), 400
-        
+
         # Читаем и декодируем изображение
         image_bytes = file.read()
         bgr_img = decode_image_to_bgr(image_bytes)
@@ -291,14 +291,14 @@ def process():
         filtered_objects = filter_detections(raw_objects)
         found = Counter(obj.cls_name for obj in filtered_objects)
         is_complete, result_text, missing = build_result(found)
-        
+
         return jsonify({
             'success': True,
             'is_complete': is_complete,
             'result_text': result_text,
             'missing': missing
         })
-    
+
     except Exception as e:
         return jsonify({'error': f'Ошибка обработки: {str(e)}'}), 500
 
@@ -307,19 +307,19 @@ if __name__ == '__main__':
     # Создаем папки если их нет
     Path('templates').mkdir(exist_ok=True)
     Path('static').mkdir(exist_ok=True)
-    
+
     # Получаем порт из переменной окружения (для Coolify) или используем 5000 по умолчанию
     port = int(os.environ.get('PORT', 5000))
-    
+
     # Выводим информацию о запуске для логов Coolify
     print(f"Starting Flask application on port {port}")
     print(f"PORT environment variable: {os.environ.get('PORT', 'not set (using default 5000)')}")
-    print(f"Host: 0.0.0.0")
+    print("Host: 0.0.0.0")
     sys.stdout.flush()
-    
+
     try:
         # Запускаем без лишнего вывода
-        print(f"Calling app.run()...")
+        print("Calling app.run()...")
         sys.stdout.flush()
         app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
         print(f"Flask server started successfully on 0.0.0.0:{port}")
