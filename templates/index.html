@@ -103,47 +103,65 @@
             e.stopPropagation();
         });
         
+        function openFilePicker(inputEl) {
+            uploadDropdown.classList.remove('open');
+            inputEl.value = '';
+            hideError();
+            // Даем браузеру завершить обработку клика перед открытием системного окна.
+            setTimeout(() => inputEl.click(), 0);
+        }
+
         // Кнопка «Сделать фото»
         cameraBtn.addEventListener('click', () => {
-            uploadDropdown.classList.remove('open');
-            cameraInput.value = '';
-            cameraInput.click();
+            openFilePicker(cameraInput);
         });
         
         // Кнопка «Выбрать из галереи»
         galleryBtn.addEventListener('click', () => {
-            uploadDropdown.classList.remove('open');
-            galleryInput.value = '';
-            galleryInput.click();
+            openFilePicker(galleryInput);
         });
-        
+
         // Общий обработчик выбора файла
         function handleFileSelect(e) {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                return;
+            }
             
             // Проверка типа файла
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
+                uploadSpinner.style.display = 'none';
                 showError('Недопустимый формат файла. Используйте JPG, PNG или WEBP.');
                 return;
             }
             
-            // Показываем спиннер загрузки, прячем кнопку
+            // Держим спиннер до завершения чтения файла.
             currentFile = file;
-            uploadBtn.style.display = 'none';
             uploadSpinner.style.display = 'flex';
+            // Прячем старое превью, чтобы спиннер был заметен.
             previewArea.style.display = 'none';
             hideError();
+            const spinnerStartedAt = Date.now();
             
             const reader = new FileReader();
             reader.onload = (ev) => {
-                originalImage.src = ev.target.result;
+                const minSpinnerMs = 350;
+                const elapsed = Date.now() - spinnerStartedAt;
+                const delay = Math.max(0, minSpinnerMs - elapsed);
+
+                setTimeout(() => {
+                    originalImage.src = ev.target.result;
+                    uploadSpinner.style.display = 'none';
+                    previewArea.style.display = 'block';
+                    singlePreview.style.display = 'flex';
+                    resultsPreview.style.display = 'none';
+                }, delay);
+            };
+            reader.onerror = () => {
                 uploadSpinner.style.display = 'none';
-                uploadBtn.style.display = '';
                 previewArea.style.display = 'block';
-                singlePreview.style.display = 'flex';
-                resultsPreview.style.display = 'none';
+                showError('Не удалось загрузить фото. Попробуйте еще раз.');
             };
             reader.readAsDataURL(file);
         }
@@ -155,7 +173,7 @@
         processBtn.addEventListener('click', async () => {
             if (!currentFile) return;
             
-            // Показываем спиннер
+            // Показываем спиннер обработки
             loadingSpinner.style.display = 'flex';
             singlePreview.style.display = 'none';
             hideError();
