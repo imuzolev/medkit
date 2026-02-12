@@ -79,9 +79,18 @@ jobs:
         run: |
           if [ -n "${{ secrets.COOLIFY_WEBHOOK_URL }}" ]; then
             echo "Triggering Coolify deployment via webhook..."
+            
+            # Собираем заголовки: Content-Type + опциональный Bearer-токен
+            AUTH_HEADER=""
+            if [ -n "${{ secrets.COOLIFY_TOKEN }}" ]; then
+              AUTH_HEADER="-H \"Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}\""
+            fi
+
             response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
               -H "Content-Type: application/json" \
+              ${AUTH_HEADER} \
               -d '{"ref":"refs/heads/main","repository":{"full_name":"imuzolev/medkit"}}')
+
             if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
               echo "✓ Coolify deployment triggered successfully (HTTP $response)"
             else
