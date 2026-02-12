@@ -50,7 +50,13 @@
                 </div>
             </div>
             
-            <!-- Loading spinner -->
+            <!-- Upload spinner -->
+            <div id="uploadSpinner" class="spinner" style="display: none;">
+                <div class="spinner-circle"></div>
+                <p>Загрузка фото...</p>
+            </div>
+            
+            <!-- Processing spinner -->
             <div id="loadingSpinner" class="spinner" style="display: none;">
                 <div class="spinner-circle"></div>
                 <p>Обработка...</p>
@@ -76,6 +82,7 @@
         const resultImage = document.getElementById('resultImage');
         const resultStatus = document.getElementById('resultStatus');
         const resultDetails = document.getElementById('resultDetails');
+        const uploadSpinner = document.getElementById('uploadSpinner');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const errorMessage = document.getElementById('errorMessage');
         
@@ -122,15 +129,21 @@
                 return;
             }
             
-            // Сохраняем файл и показываем превью
+            // Показываем спиннер загрузки, прячем кнопку
             currentFile = file;
+            uploadBtn.style.display = 'none';
+            uploadSpinner.style.display = 'flex';
+            previewArea.style.display = 'none';
+            hideError();
+            
             const reader = new FileReader();
             reader.onload = (ev) => {
                 originalImage.src = ev.target.result;
+                uploadSpinner.style.display = 'none';
+                uploadBtn.style.display = '';
                 previewArea.style.display = 'block';
                 singlePreview.style.display = 'flex';
                 resultsPreview.style.display = 'none';
-                hideError();
             };
             reader.readAsDataURL(file);
         }
