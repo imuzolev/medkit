@@ -1,0 +1,13 @@
+train: ../data/augmented/train/images
+val: ../data/augmented/valid/images
+test: ../data/augmented/test/images
+
+nc: 14
+names: ['Adhesive plaster', 'Artificial respiration device', 'Gloves', 'Instruction leaflet', 'Large bandage', 'Medical mask', 'Medical wipes', 'Notepad', 'Scissors', 'Thermal blanket', 'Tourniquet', 'pencil', 'small bandage', 'wipes']
+
+roboflow:
+  workspace: vision-udfkl
+  project: aptechka
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/vision-udfkl/aptechka/dataset/3

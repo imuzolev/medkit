@@ -1,0 +1,39 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Model weights (download separately or train)
+*.pt
+*.pth
+*.onnx
+
+# Dataset images & labels (download from Roboflow or augment locally)
+data/raw/train/
+data/raw/valid/
+data/raw/test/
+data/augmented/train/
+data/augmented/valid/
+data/augmented/test/
+data/reshuffled/train/
+data/reshuffled/valid/
+
+# Training logs and weights
+logs/train/
+
+# Inference results
+inference/input/*.jpg
+inference/input/*.jpeg
+inference/input/*.png
+inference/output/*.jpg
+inference/output/*.jpeg
+inference/output/*.png
+inference/output/report.txt
+
+# OS files
+.DS_Store
+Thumbs.db

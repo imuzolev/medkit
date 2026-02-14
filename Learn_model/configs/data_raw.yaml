@@ -1,0 +1,6 @@
+train: ../data/raw/train/images
+val: ../data/raw/valid/images
+test: ../data/raw/test/images
+
+nc: 14
+names: ['Adhesive plaster', 'Artificial respiration device', 'Gloves', 'Instruction leaflet', 'Large bandage', 'Medical mask', 'Medical wipes', 'Notepad', 'Scissors', 'Thermal blanket', 'Tourniquet', 'pencil', 'small bandage', 'wipes']
