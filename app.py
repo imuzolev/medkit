@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import sys
@@ -241,6 +242,23 @@ def filter_detections(raw_objects: list[DetectedObject]) -> list[DetectedObject]
     return filtered_bandages + filtered_others
 
 
+def draw_boxes(image: np.ndarray, objects: list[DetectedObject]) -> np.ndarray:
+    """Рисует bounding-боксы на изображении без подписей."""
+    annotated = image.copy()
+    color = (0, 255, 0)  # зелёный BGR
+    thickness = 2
+    for obj in objects:
+        x1, y1, x2, y2 = obj.box.astype(int)
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), color, thickness)
+    return annotated
+
+
+def encode_image_to_base64(image: np.ndarray) -> str:
+    """Кодирует OpenCV-изображение в base64 строку (JPEG)."""
+    _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return base64.b64encode(buffer).decode('utf-8')
+
+
 def build_result(found: Counter) -> tuple[bool, str, list[str]]:
     """Формирует итоговый текст по комплектности."""
     missing = []
@@ -292,11 +310,16 @@ def process():
         found = Counter(obj.cls_name for obj in filtered_objects)
         is_complete, result_text, missing = build_result(found)
 
+        # Рисуем боксы на изображении (без подписей) и кодируем в base64
+        annotated_img = draw_boxes(bgr_img, filtered_objects)
+        annotated_b64 = encode_image_to_base64(annotated_img)
+
         return jsonify({
             'success': True,
             'is_complete': is_complete,
             'result_text': result_text,
-            'missing': missing
+            'missing': missing,
+            'annotated_image': annotated_b64,
         })
 
     except Exception as e:

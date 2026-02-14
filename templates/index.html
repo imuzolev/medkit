@@ -43,8 +43,19 @@
                 </div>
                 
                 <div id="resultsPreview" class="results-preview" style="display: none;">
-                    <div class="preview-wrapper">
-                        <img id="resultImage" src="" alt="Загруженное фото">
+                    <div class="comparison">
+                        <div class="comparison-item">
+                            <img id="resultOriginal" src="" alt="Исходное фото">
+                        </div>
+                        <div class="comparison-arrow">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                        <div class="comparison-item">
+                            <img id="resultImage" src="" alt="Результат обработки">
+                        </div>
                     </div>
                     <div id="resultStatus" class="success-message"></div>
                     <div id="resultDetails"></div>
@@ -80,6 +91,7 @@
         const singlePreview = document.getElementById('singlePreview');
         const resultsPreview = document.getElementById('resultsPreview');
         const originalImage = document.getElementById('originalImage');
+        const resultOriginal = document.getElementById('resultOriginal');
         const resultImage = document.getElementById('resultImage');
         const resultStatus = document.getElementById('resultStatus');
         const resultDetails = document.getElementById('resultDetails');
@@ -195,7 +207,8 @@
                 }
                 
                 // Показываем результаты проверки комплектации
-                resultImage.src = originalImage.src;
+                resultOriginal.src = originalImage.src;
+                resultImage.src = 'data:image/jpeg;base64,' + data.annotated_image;
                 resultStatus.textContent = data.is_complete ? 'Комплектация полная' : 'Комплектация неполная';
                 resultStatus.classList.toggle('status-incomplete', !data.is_complete);
                 
