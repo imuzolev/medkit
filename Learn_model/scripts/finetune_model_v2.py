@@ -9,7 +9,7 @@ def main():
     # Загружаем базовую модель (pretrained COCO)
     # Если вы хотите продолжить старое обучение, используйте 'logs/train/yolo_finetune_reshuffled/weights/best.pt'
     # Но для чистоты эксперимента и исправления ошибок (bias) лучше начать с yolov8n.pt
-    model = YOLO('models/yolov8n.pt') 
+    model = YOLO('yolov8n.pt')  # скачивается автоматически
 
     # Запускаем обучение
     results = model.train(
