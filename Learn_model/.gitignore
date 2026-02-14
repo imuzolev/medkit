@@ -7,9 +7,6 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Pretrained base weights (auto-downloaded by ultralytics)
-models/*.pt
-
 # Dataset images & labels (download from Roboflow or augment locally)
 data/raw/train/
 data/raw/valid/

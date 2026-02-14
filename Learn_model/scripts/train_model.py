@@ -178,9 +178,10 @@ def main():
 
     print(f"\n[ДАННЫЕ] Загрузка датасета из: {data_yaml}")
 
-    # Инициализация модели (скачивается автоматически если нет локально)
+    # Инициализация модели
     print("\n[МОДЕЛЬ] Инициализация YOLOv8s...")
-    model = YOLO("yolov8s.pt")
+    weights_path = os.path.join(base_dir, "models", "yolov8s.pt")
+    model = YOLO(weights_path if os.path.exists(weights_path) else "yolov8s.pt")
 
     # Колбэк для вывода информации после каждой эпохи
     model.add_callback("on_fit_epoch_end", on_fit_epoch_end)
